@@ -633,7 +633,8 @@
         <h1>Oyun Deneyimini<br><span>Zirveye</span> Taşı</h1>
         <p class="desc">Depot, manifest ve oyun yardımcı araçlarını tek tıkla yönetebileceğin modern, güçlü ve şeffaf masaüstü yazılımı.</p>
         <div class="btn-group">
-          <a href="https://github.com/Ercan06TR/TerapiTools/releases/download/TerapiTools/TerapiTools_Setup.exe" class="btn-primary">
+          <!-- GÜNCELLENEN İNDİRME LİNKİ (404 Hatası Çözüldü) -->
+          <a href="https://github.com/TerapiTools/TerapiTools/releases/download/1.0/TerapiTools_Setup.exe" class="btn-primary">
             <span class="material-symbols-outlined">download</span> Hemen İndir
           </a>
           <a href="https://discord.gg/muBU2VDRmC" target="_blank" class="btn-secondary">
@@ -671,7 +672,7 @@
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">touch_app</span></div>
           <h3>Kullanım Kolaylığı</h3>
-          <p>Basit ve anlaşılır arayüzü sayesinde hiçbir teknik bilgiye ihtiyaç duymadan oyunlarınızı hazırlayabilirsiniz.</p>
+          <p>Basit-anlaşılır arayüzü sayesinde hiçbir teknik bilgiye ihtiyaç duymadan oyunlarınızı hazırlayabilirsiniz.</p>
         </div>
       </div>
     </section>
@@ -730,28 +731,22 @@
   const menuIcon = menuBtn.querySelector('.material-symbols-outlined');
 
   function switchTab(targetId) {
-    // Hide all sections, remove active class
     sections.forEach(sec => {
       sec.classList.remove('active');
-      void sec.offsetWidth; // trigger reflow for animation
+      void sec.offsetWidth;
     });
     
-    // Remove active state from all sidebar links
     document.querySelectorAll('#nav-links a').forEach(link => link.classList.remove('active'));
 
-    // Show target section
     const targetSection = document.getElementById(targetId);
     if(targetSection) targetSection.classList.add('active');
 
-    // Highlight active link
     const activeLink = document.querySelector(`nav a[data-target="${targetId}"]`);
     if(activeLink) activeLink.classList.add('active');
 
-    // Close mobile menu if open
     sidebar.classList.remove('open');
     menuIcon.textContent = 'menu';
     
-    // Smooth scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -766,7 +761,6 @@
     });
   });
 
-  // Mobile menu toggle
   menuBtn.addEventListener('click', () => {
     sidebar.classList.toggle('open');
     if(sidebar.classList.contains('open')) {
@@ -776,7 +770,6 @@
     }
   });
 
-  // Handle initial load with hash
   if(window.location.hash) {
     const hash = window.location.hash.substring(1);
     if(document.getElementById(hash)) {
@@ -798,7 +791,6 @@
     const message = suggestionText.value.trim();
     if (!message) return;
 
-    // Loading state
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Gönderiliyor...';
     statusDiv.style.display = 'none';
@@ -813,39 +805,33 @@
           embeds: [{
             title: "💡 Yeni Bir Öneri Geldi!",
             description: message,
-            color: 11032055, // Decimal for #a855f7 (Neon Purple)
+            color: 11032055,
             timestamp: new Date().toISOString()
           }]
         })
       });
 
       if (response.ok) {
-        // Success
         suggestionText.value = '';
         statusDiv.className = 'status-success';
         statusDiv.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Öneriniz başarıyla iletildi. Teşekkür ederiz!';
       } else {
-        // Error response from Discord
         throw new Error('Webhook error');
       }
     } catch (error) {
-      // Network or execution error
       statusDiv.className = 'status-error';
       statusDiv.innerHTML = '<span class="material-symbols-outlined">error</span> Gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
     } finally {
-      // Reset button
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span> Gönder';
       statusDiv.style.display = 'flex';
       
-      // Auto-hide status message after 5 seconds
       setTimeout(() => {
         statusDiv.style.display = 'none';
       }, 5000);
     }
   });
 
-  // Adding quick spin animation for the loading icon
   const style = document.createElement('style');
   style.innerHTML = `
     @keyframes spin { 
