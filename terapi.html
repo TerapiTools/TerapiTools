@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lisium — Lua Generator</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --green:  #22c55e;
+  --blue:   #38bdf8;
+  --purple: #a78bfa;
+  --bg:     #05060f;
+  --glass:  rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.09);
+  --input-bg: rgba(0,0,0,0.35);
+  --text:   #e2e8f0;
+  --muted:  #64748b;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ── ambient light orbs ── */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: .18;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-1 {
+  width: 520px; height: 520px;
+  background: var(--green);
+  top: -160px; left: -100px;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.orb-2 {
+  width: 420px; height: 420px;
+  background: var(--purple);
+  bottom: -120px; right: -80px;
+  animation: drift 14s ease-in-out 3s infinite alternate-reverse;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: var(--blue);
+  top: 40%; left: 55%;
+  animation: drift 20s ease-in-out 6s infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.08); }
+}
+
+/* ── mesh grid ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── centering shell ── */
+.shell {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ── glass card ── */
+.card {
+  background: var(--glass);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  padding: 48px 44px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 32px 80px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  text-align: center;
+}
+
+/* ── logo ── */
+.logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px rgba(34,197,94,.35);
+}
+
+.logo-text {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--green) 0%, var(--blue) 50%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -20px 0 32px;
+  letter-spacing: .4px;
+}
+
+/* ── input ── */
+.input-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.input-wrap input::placeholder {
+  color: var(--muted);
+}
+
+.input-wrap input:focus {
+  border-color: rgba(34,197,94,.45);
+  box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+}
+
+/* ── button ── */
+.btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(90deg, var(--green), var(--blue), var(--purple));
+  background-size: 200% 100%;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: .3px;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 24px rgba(34,197,94,.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,.12), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.btn:hover {
+  opacity: .92;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(34,197,94,.35);
+}
+
+.btn:active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ── console ── */
+.console {
+  margin-top: 20px;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  height: 160px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12.5px;
+  text-align: left;
+  scroll-behavior: smooth;
+}
+
+.console::-webkit-scrollbar { width: 4px; }
+.console::-webkit-scrollbar-track { background: transparent; }
+.console::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.1);
+  border-radius: 4px;
+}
+
+.line {
+  color: var(--green);
+  padding: 1.5px 0;
+  opacity: 0;
+  animation: fadein .25s forwards;
+}
+
+@keyframes fadein {
+  to { opacity: 1; }
+}
+
+/* ── popup ── */
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,15,.75);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  transition: opacity .5s ease, visibility .5s;
+}
+
+.popup.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.popup-box {
+  background: rgba(15,18,36,.8);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 44px 40px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.05),
+    0 40px 100px rgba(0,0,0,.6),
+    0 0 60px rgba(167,139,250,.1);
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+@keyframes popIn {
+  from { transform: scale(.9) translateY(16px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.popup-box h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  background: linear-gradient(90deg, var(--green), var(--blue), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.popup-box p {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+
+.popup-copy {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 28px !important;
+}
+
+.popup-box .btn {
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--green));
+}
+</style>
+</head>
+<body>
+
+<!-- ambient orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- disclaimer popup -->
+<div id="popup" class="popup">
+  <div class="popup-box">
+    <h2>⚡ Lisium</h2>
+    <p>This tool is provided for educational purposes only.<br>Use it at your own responsibility.</p>
+    <p class="popup-copy">© 2026 Lisium</p>
+    <button class="btn" onclick="accept()">I Understand</button>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="card">
+
+    <div class="logo-wrap">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Lisium</span>
+    </div>
+
+    <p class="tagline">Lua Generator</p>
+
+    <div class="input-wrap">
+      <input id="appid" type="text" placeholder="Enter Steam AppID" autocomplete="off" spellcheck="false">
+    </div>
+
+    <button class="btn" onclick="generate()">Generate Lua ZIP</button>
+
+    <div id="console" class="console"></div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+let depotKeys = {}
+
+async function loadKeys() {
+  try {
+    const r = await fetch("https://raw.githubusercontent.com/ardacy2112/moreemmluagenerator/refs/heads/main/depotkeys.json")
+    depotKeys = await r.json()
+  } catch {}
+}
+loadKeys()
+
+function accept() {
+  document.getElementById("popup").classList.add("hide")
+}
+
+function log(t) {
+  const c = document.getElementById("console")
+  const d = document.createElement("div")
+  d.className = "line"
+  d.textContent = t
+  c.appendChild(d)
+  c.scrollTop = c.scrollHeight
+}
+
+async function generate() {
+  const id = document.getElementById("appid").value.trim()
+  if (!id) return log("❌ Enter AppID first")
+
+  log("🔍 Connecting to Steam API...")
+
+  try {
+    const r = await fetch("https://api.steamcmd.net/v1/info/" + id)
+    const j = await r.json()
+
+    log("✅ Data loaded")
+    log("⚙  Building Lua...")
+
+    const depots = j.data[id].depots
+    let lua = `-- Generated by Lisium\naddappid(${id})\n`
+
+    for (const d in depots) {
+      if (!depots[d].manifests) continue
+      const manifest = depots[d].manifests.public.gid
+      const key = depotKeys[d] || ""
+      lua += `addappid(${d}, 1, "${key}")\n`
+      lua += `setManifestid(${d},"${manifest}")\n`
+    }
+
+    const zip = new JSZip()
+    zip.file(id + ".lua", lua)
+
+    const blob = await zip.generateAsync({ type: "blob" })
+    const a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.download = id + ".zip"
+    a.click()
+
+    log("📦 " + id + ".zip downloaded successfully")
+
+  } catch {
+    log("❌ Steam API failed — check the AppID")
+  }
+}
+
+// enter key support
+document.getElementById("appid").addEventListener("keydown", e => {
+  if (e.key === "Enter") generate()
+})
+</script>
+
+</body>
+</html>
